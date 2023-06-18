@@ -1,0 +1,29 @@
+on:
+  push:
+    branches: [main]
+
+name: ci
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Check formatting
+        run: cargo fmt --check
+
+      - name: Check linting
+        run: cargo clippy
+      
+      - name: Run tests
+        run: cargo test --release
+
+  
