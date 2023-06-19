@@ -37,3 +37,36 @@ async fn get_all_users_when_no_users() {
     .expect_content_type_json()
     .expect_body_json_eq(json!([]));
 }
+
+#[tokio::test]
+async fn create_five_users_and_get_all_of_them() {
+  let address = setup().await;
+
+  let futures = ["Alice", "Barbara", "Catherine", "Diana", "Elise"]
+    .into_iter()
+    .enumerate()
+    .map(|(id, username)| async move {
+      Client::new()
+        .post(format!("http://{address}/api/users"))
+        .json(&json!({ "username": username }))
+        .send()
+        .await
+        .expect_status_ok()
+        .expect_content_type_json()
+        .expect_body_json_eq(json!({ "id": id, "username": username }));
+    });
+
+  future::join_all(futures).await;
+
+  reqwest::get(format!("http://{address}/api/users"))
+    .await
+    .expect_status_ok()
+    .expect_content_type_json()
+    .expect_body_json_eq(json!([
+      { "id": 0, "username": "Alice" },
+      { "id": 1, "username": "Barbara" },
+      { "id": 2, "username": "Catherine" },
+      { "id": 3, "username": "Diana" },
+      { "id": 4, "username": "Elise" },
+    ]));
+}
