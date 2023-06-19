@@ -28,3 +28,12 @@ pub async fn create_user(
 
   Json(created)
 }
+
+pub async fn create_users_router() -> Router {
+  let shared_state = UsersCollection::new_shared().await;
+
+  Router::new()
+    .route("/", get(get_all_users))
+    .route("/", post(create_user))
+    .with_state(shared_state)
+}
