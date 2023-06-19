@@ -30,6 +30,10 @@ impl UsersCollection {
 
     Ok(created)
   }
+
+  pub async fn try_get_all_users(&self) -> Result<Vec<User>, ()> {
+    Ok(self.users.clone())
+  }
 }
 
 pub type SharedUsersState = Arc<Mutex<UsersCollection>>;
