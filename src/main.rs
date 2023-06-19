@@ -22,7 +22,7 @@ async fn main() -> Result<(), hyper::Error> {
   let socket = create_socket_address_from_env();
   println!("Attempting to create and bind server to socket {socket}");
 
-  let server = create_server(socket);
+  let server = create_server(socket).await;
 
   println!("Server bound to {}", server.local_addr());
 
