@@ -3,6 +3,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Json};
 use axum::routing::{get, post, Router};
 use serde::Deserialize;
+use serde_json::json;
 
 use super::users_model::{SharedUsersState, UsersCollection};
 
@@ -34,13 +35,16 @@ pub async fn get_user_by_id(
   Path(id): Path<usize>,
   State(state): State<SharedUsersState>,
 ) -> impl IntoResponse {
-  let guard = state.lock().await;
-  let user = guard.try_get_user_by_id(id).await;
-
-  match user {
-    Ok(user) => Json(user).into_response(),
-    Err(_) => (StatusCode::NOT_FOUND, "user not found").into_response(),
-  }
+  state.lock().await.try_get_user_by_id(id).await.map_or_else(
+    |_| {
+      (
+        StatusCode::NOT_FOUND,
+        Json(json!({ "error": "User not found" })),
+      )
+        .into_response()
+    },
+    |user| Json(user.clone()).into_response(),
+  )
 }
 
 pub async fn create_users_router() -> Router {
