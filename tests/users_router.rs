@@ -97,3 +97,15 @@ async fn create_five_users_and_get_each_one_by_id() {
 
   future::join_all(futures).await;
 }
+
+#[tokio::test]
+async fn get_non_existent_user() {
+  let address = setup().await;
+
+  reqwest::get(format!("http://{address}/api/users/0"))
+    .await
+    .expect_status_not_found()
+    .expect_body_json_eq(json!({
+       "error": "User not found"
+    }));
+}
