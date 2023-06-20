@@ -10,5 +10,5 @@ async fn health_router_responds_correctly() {
   reqwest::get(format!("http://{address}/api/health"))
     .await
     .expect_status_ok()
-    .expect_body_text_eq("OK");
+    .expect_body_text_eq("Server is up and running");
 }

@@ -10,7 +10,7 @@ pub async fn create_server(address: SocketAddr) -> Server {
   let users_router = users::create_users_router().await;
 
   let app = Router::new()
-    .route("/api/health", get(|| async { "OK" }))
+    .route("/api/health", get(|| async { "Server is up and running" }))
     .nest("/api/users", users_router);
 
   axum::Server::bind(&address).serve(app.into_make_service())
