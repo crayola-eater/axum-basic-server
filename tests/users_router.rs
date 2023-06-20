@@ -70,3 +70,30 @@ async fn create_five_users_and_get_all_of_them() {
       { "id": 4, "username": "Elise" },
     ]));
 }
+
+#[tokio::test]
+async fn create_five_users_and_get_each_one_by_id() {
+  let address = setup().await;
+
+  let futures = ["Alice", "Barbara", "Catherine", "Diana", "Elise"]
+    .into_iter()
+    .enumerate()
+    .map(|(id, username)| async move {
+      Client::new()
+        .post(format!("http://{address}/api/users"))
+        .json(&json!({ "username": username }))
+        .send()
+        .await
+        .expect_status_ok()
+        .expect_content_type_json()
+        .expect_body_json_eq(json!({ "id": id, "username": username }));
+
+      reqwest::get(format!("http://{address}/api/users/{id}"))
+        .await
+        .expect_status_ok()
+        .expect_content_type_json()
+        .expect_body_json_eq(json!({ "id": id, "username": username }));
+    });
+
+  future::join_all(futures).await;
+}
