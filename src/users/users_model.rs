@@ -34,6 +34,10 @@ impl UsersCollection {
   pub async fn try_get_all_users(&self) -> Result<Vec<User>, ()> {
     Ok(self.users.clone())
   }
+
+  pub async fn try_get_user_by_id(&self, id: usize) -> Result<&User, ()> {
+    self.users.iter().find(|user| user.id == id).ok_or(())
+  }
 }
 
 pub type SharedUsersState = Arc<Mutex<UsersCollection>>;
