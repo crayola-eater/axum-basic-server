@@ -109,3 +109,43 @@ async fn get_non_existent_user() {
        "error": "User not found"
     }));
 }
+
+#[tokio::test]
+async fn delete_user_by_id() {
+  let address = setup().await;
+
+  let futures = ["Alice", "Barbara", "Catherine", "Diana", "Elise"]
+    .into_iter()
+    .enumerate()
+    .map(|(id, username)| async move {
+      Client::new()
+        .post(format!("http://{address}/api/users"))
+        .json(&json!({ "username": username }))
+        .send()
+        .await
+        .expect_status_ok()
+        .expect_content_type_json()
+        .expect_body_json_eq(json!({ "id": id, "username": username }));
+    });
+
+  future::join_all(futures).await;
+
+  Client::new()
+    .delete(format!("http://{address}/api/users/3"))
+    .send()
+    .await
+    .expect_status_ok()
+    .expect_content_type_json()
+    .expect_body_json_eq(json!({ "id": 3, "username": "Diana" }));
+
+  reqwest::get(format!("http://{address}/api/users"))
+    .await
+    .expect_status_ok()
+    .expect_content_type_json()
+    .expect_body_json_eq(json!([
+      { "id": 0, "username": "Alice" },
+      { "id": 1, "username": "Barbara" },
+      { "id": 2, "username": "Catherine" },
+      { "id": 4, "username": "Elise" },
+    ]));
+}
