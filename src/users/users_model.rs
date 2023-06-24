@@ -38,6 +38,15 @@ impl UsersCollection {
   pub async fn try_get_user_by_id(&self, id: usize) -> Result<&User, ()> {
     self.users.iter().find(|user| user.id == id).ok_or(())
   }
+
+  pub async fn try_delete_user_by_id(&mut self, id: usize) -> Result<User, ()> {
+    self
+      .users
+      .iter()
+      .position(|user| user.id == id)
+      .ok_or(())
+      .map(|position| self.users.swap_remove(position))
+  }
 }
 
 pub type SharedUsersState = Arc<Mutex<UsersCollection>>;
