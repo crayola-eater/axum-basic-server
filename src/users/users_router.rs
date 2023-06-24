@@ -1,7 +1,7 @@
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Json};
-use axum::routing::{get, post, Router};
+use axum::routing::{delete, get, post, Router};
 use serde::Deserialize;
 use serde_json::json;
 
@@ -47,6 +47,27 @@ pub async fn get_user_by_id(
   )
 }
 
+pub async fn delete_user_by_id(
+  Path(id): Path<usize>,
+  State(state): State<SharedUsersState>,
+) -> impl IntoResponse {
+  state
+    .lock()
+    .await
+    .try_delete_user_by_id(id)
+    .await
+    .map_or_else(
+      |_| {
+        (
+          StatusCode::NOT_FOUND,
+          Json(json!({ "error": "User not found" })),
+        )
+          .into_response()
+      },
+      |user| Json(user.clone()).into_response(),
+    )
+}
+
 pub async fn create_users_router() -> Router {
   let shared_state = UsersCollection::new_shared().await;
 
@@ -54,5 +75,6 @@ pub async fn create_users_router() -> Router {
     .route("/", get(get_all_users))
     .route("/", post(create_user))
     .route("/:user_id", get(get_user_by_id))
+    .route("/:user_id", delete(delete_user_by_id))
     .with_state(shared_state)
 }
