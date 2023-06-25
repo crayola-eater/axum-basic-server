@@ -4,11 +4,11 @@ on:
   pull_request:
     branches: [main]
 
-name: ci
+name: CI
 
 jobs:
   ci:
-    name: ci
+    name: build_and_test
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
