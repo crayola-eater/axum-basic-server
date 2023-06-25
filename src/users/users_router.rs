@@ -64,7 +64,7 @@ pub async fn delete_user_by_id(
         )
           .into_response()
       },
-      |user| Json(user.clone()).into_response(),
+      |user| Json(user).into_response(),
     )
 }
 
